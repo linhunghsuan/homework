@@ -1,63 +1,53 @@
 import streamlit as st
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 
 # Set the app title
-st.title('Interactive Linear Regression')
+st.title('Interactive Linear Regression with Adjustable Parameters')
 
 # Instructions
 st.write("""
-This app allows you to explore how changes in house size affect the predicted house price using linear regression.
+This app allows you to adjust the following parameters for a linear regression:
+- Slope: The steepness of the line.
+- Noise Scale: The randomness added to the data.
+- Number of Points: The number of data points in the dataset.
 """)
 
-# Sidebar sliders to adjust the number of points and noise level
-n_points = st.sidebar.slider('Number of Data Points', 5, 50, 10)
-noise_level = st.sidebar.slider('Noise Level', 0.0, 100.0, 20.0)
+# Sidebar sliders to adjust parameters
+slope = st.sidebar.slider('Slope', 0.0, 10.0, 1.0)
+noise_scale = st.sidebar.slider('Noise Scale', 0.0, 100.0, 20.0)
+n_points = st.sidebar.slider('Number of Points', 10, 500, 100)
 
-# Generate a sample dataset based on the user input
+# Generate random data based on user-defined slope, noise, and number of points
 np.random.seed(42)
-house_size = np.linspace(1000, 3000, n_points)
-house_price = 200 + house_size * 0.1 + np.random.normal(0, noise_level, n_points)
+X = np.linspace(0, 100, n_points)
+noise = np.random.normal(0, noise_scale, n_points)
+y = slope * X + noise
 
-# Create a DataFrame to hold the data
-df = pd.DataFrame({'Size': house_size, 'Price': house_price})
-
-# Display the data
-st.write('### Generated Data')
-st.write(df)
-
-# Prepare the data for modeling
-X = df[['Size']]
-y = df['Price']
+# Reshape X for linear regression
+X_reshaped = X.reshape(-1, 1)
 
 # Train the linear regression model
 model = LinearRegression()
-model.fit(X, y)
+model.fit(X_reshaped, y)
 
 # Generate predictions
-y_pred = model.predict(X)
+y_pred = model.predict(X_reshaped)
 
-# Display the slope and intercept of the regression line
+# Display the model's slope and intercept
 st.write(f"### Linear Regression Model: ")
-st.write(f"**Slope (Coefficient):** {model.coef_[0]:.4f}")
+st.write(f"**Estimated Slope (Coefficient):** {model.coef_[0]:.4f}")
 st.write(f"**Intercept:** {model.intercept_:.2f}")
 
 # Plot the data points and the regression line
 plt.figure(figsize=(8, 6))
-plt.scatter(X, y, color='blue', label='Actual Data')
+plt.scatter(X, y, color='blue', label='Data Points')
 plt.plot(X, y_pred, color='red', linewidth=2, label='Regression Line')
-plt.xlabel('House Size (sq. ft.)')
-plt.ylabel('House Price ($1000s)')
-plt.title('House Size vs. Price')
+plt.xlabel('X')
+plt.ylabel('y')
+plt.title('Linear Regression with Adjustable Parameters')
 plt.legend()
 
 # Display the plot
 st.pyplot(plt)
-
-# Predict the price of a new house size using a slider
-new_size = st.sidebar.slider('New House Size (sq. ft.)', 1000, 3000, 1500)
-predicted_price = model.predict([[new_size]])
-
-st.write(f"### Predicted Price for House Size {new_size} sq. ft.: ${predicted_price[0]:.2f}K")
