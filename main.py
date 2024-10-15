@@ -3,8 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
-# ver 1.0.1 use crisp-dm
-# ver 1.1.1 use Streamlit
+
 # Set the app title
 st.title('Interactive Linear Regression')
 
